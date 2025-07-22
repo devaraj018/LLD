@@ -1,22 +1,22 @@
 import java.util.ArrayList;
 import java.util.List;
 
+// Observer interface: subscriber who receives updates
 interface ISubscriber {
-    void update();
+    void update(String videoTitle);
 }
 
 // Observable interface: a YouTube channel interface
 interface IChannel {
     void subscribe(ISubscriber subscriber);
     void unsubscribe(ISubscriber subscriber);
-    void notifySubscribers();
+    void notifySubscribers(String videoTitle);
 }
 
 // Concrete Subject: a YouTube channel that observers can subscribe to
 class Channel implements IChannel {
-    private List<ISubscriber> subscribers;
+    private List<ISubscriber> subscribers; // list of all subscribers
     private String name;
-    private String latestVideo;
 
     public Channel(String name) {
         this.name = name;
@@ -25,6 +25,7 @@ class Channel implements IChannel {
 
     @Override
     public void subscribe(ISubscriber subscriber) {
+        // add subscriber only if not already subscribed
         if (!subscribers.contains(subscriber)) {
             subscribers.add(subscriber);
         }
@@ -32,40 +33,36 @@ class Channel implements IChannel {
 
     @Override
     public void unsubscribe(ISubscriber subscriber) {
+        // remove subscriber
         subscribers.remove(subscriber);
     }
 
     @Override
-    public void notifySubscribers() {
+    public void notifySubscribers(String videoTitle) {
+        // notify each subscriber about the new video
         for (ISubscriber sub : subscribers) {
-            sub.update();
+            sub.update(videoTitle);
         }
     }
 
+    // upload video and notify all subscribers
     public void uploadVideo(String title) {
-        latestVideo = title;
         System.out.println("\n[" + name + " uploaded \"" + title + "\"]");
-        notifySubscribers();
-    }
-
-    public String getVideoData() {
-        return "\nCheckout our new Video : " + latestVideo + "\n";
+        notifySubscribers(title);
     }
 }
 
 // Concrete Observer: represents a subscriber to the channel
 class Subscriber implements ISubscriber {
     private String name;
-    private Channel channel;
 
-    public Subscriber(String name, Channel channel) {
+    public Subscriber(String name) {
         this.name = name;
-        this.channel = channel;
     }
 
     @Override
-    public void update() {
-        System.out.println("Hey " + name + "," + channel.getVideoData());
+    public void update(String videoTitle) {
+        System.out.println("Hey " + name + ",\nCheckout our new Video : " + videoTitle + "\n");
     }
 }
 
@@ -74,8 +71,8 @@ public class ObserverDesignPattern {
         // Create a channel and subscribers
         Channel channel = new Channel("CoderArmy");
 
-        Subscriber subs1 = new Subscriber("Varun", channel);
-        Subscriber subs2 = new Subscriber("Tarun", channel);
+        Subscriber subs1 = new Subscriber("Varun");
+        Subscriber subs2 = new Subscriber("Tarun");
 
         // Varun and Tarun subscribe to CoderArmy
         channel.subscribe(subs1);
@@ -91,5 +88,3 @@ public class ObserverDesignPattern {
         channel.uploadVideo("Decorator Pattern Tutorial");
     }
 }
-
-
